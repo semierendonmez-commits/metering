@@ -22,12 +22,18 @@ the engine uses a highly optimized supercollider dsp core for the heavy lifting 
 
 ---
 
-## what's new in v1.1
+### what's new in v1.1?
 
-- **strict standards**: the engine now strictly follows ITU-R BS.1770-4 and EBU R128 standards. uses exact 1682Hz high-shelf and 38.1Hz high-pass biquad filters.
-- **absolute gating**: added a -70 LUFS absolute gate. if your track has a silent break, the integrated (INT) average will hold its place instead of dropping to negative infinity.
-- **momentary loudness (MOM)**: added a 400ms momentary window to track fast transients and micro-dynamics.
-- **hardware calibration**: added a trim offset to compensate for unbalanced (TS) cables or ADC headroom. defaults to +10 dB out of the box to seamlessly match standard daw levels, but can be fine-tuned using E1.
+**1. hardware calibration trim (E1)**
+*why is my norns showing -24 when my daw shows -14?* if you use unbalanced (ts) cables or hit the hardware adc headroom, you lose exact voltage. to fix this, **E1** is now a calibration trim. the script **defaults to +10 db** ( set after my own output calibration tests) out of the box to perfectly match most standard audio interfaces and daw levels, but you can always fine-tune it to your studio by turning E1.
+
+
+**2. momentary LUFS (MOM)**
+the ui now features three LUFS values. alongside the 3-second SHORT and the overall INT, there is now a 400ms MOMENTARY meter. it dances beautifully with your kicks and transients.
+
+**3. Engine rewrite**
+the dsp engine has been rewritten to strictly follow itu-r bs.1770-4 / ebu r128 standards. it now features an absolute gate at -70 LUFS. if you stop the music or hit a silent break, the integrated (INT) average holds its place instead of dropping to negative infinity. mathematically identical to your studio plugins.
+
 
 ## controls
 
