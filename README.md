@@ -12,7 +12,22 @@ the engine uses a highly optimized supercollider dsp core for the heavy lifting 
 - norns (shield, standard, or fates)
 - an active audio signal going into the hardware inputs (`Line In`)
 
+### the tools
 
+**LUFS**: massive short-term and integrated loudness values. dial in your desired target (e.g. -14dB) using E2. the numbers will glow when you hit your target.
+
+**spectrum**: a 32-band logarithmic analyzer. complete with smooth "peak hold" dots that fall with gravity, just like your favorite daw plugins. if the input is quiet, use E3 to pull the ceiling down and zoom in.
+
+**phase**: a simple correlation meter. quickly check if your stereo field is beautifully wide (0), perfectly mono (+1), or dangerously out-of-phase (-1).
+
+---
+
+### controls
+
+**K2**: freeze / unfreeze screen
+**K3**: reset integrated LUFS
+**E2**: adjust target LUFS level
+**E3**: adjust spectrum ceiling / zoom
 
 
 ## install
