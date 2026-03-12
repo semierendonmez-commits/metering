@@ -1,6 +1,6 @@
 # metering
 
-a professional-grade audio analyzer for [norns](https://monome.org/docs/norns/)
+an audio analyzer for [norns](https://monome.org/docs/norns/)
 
 turn your norns into a dedicated hardware metering unit. it listens to the physical audio inputs (L/R) and provides real-time visual feedback for mastering, mixing, or live performance monitoring. 
 
