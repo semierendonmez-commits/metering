@@ -1,16 +1,19 @@
 -- scriptname: metering
--- v2.0.0
--- description: Pro Audio Analyzer \n K2: Freeze Display \n K3: Reset INT LUFS \n E2: Target LUFS \n E3: Spec Max dB
+-- v2.2.0
+-- description: Pro Audio Analyzer \n K2: Freeze \n K3: Reset INT \n E1: Calib Trim \n E2: Target \n E3: Spec Max
 
 engine.name = 'Metering'
 
--- Global State
 local is_frozen = false
-local target_lufs = -14  -- Varsayılan endüstri standardı (Örn: Streaming için)
-local spec_max = 0       -- Spektrumun tavan noktası (Sinyali görsel olarak büyütmek için)
-local peak_decay = 0.5   -- Peak noktalarının düşme hızı
+local target_lufs = -14
+local spec_max = 0
+local peak_decay = 0.5
+
+-- YENİ: Kalibrasyon Offset'i (E1 ile ayarlanır)
+local calib_db = 10 
 
 local data = {
+  mom = -70,
   st = -70,
   int = -70,
   corr = 0,
@@ -18,7 +21,6 @@ local data = {
   peaks = {}
 }
 
--- Spektrum ve Tepe (Peak) tablolarını başlat
 for i=1, 32 do 
   data.spec[i] = -70 
   data.peaks[i] = -70
@@ -27,9 +29,6 @@ end
 _G.screen_dirty = false
 
 function init()
-  print("Pro Metering UI Started.")
-  
-  -- 15 FPS Çizim Döngüsü
   clock.run(function()
     while true do
       clock.sleep(1/15)
@@ -41,21 +40,19 @@ function init()
   end)
 end
 
--- SC Motorundan Gelen OSC Verileri
 osc.event = function(path, args, from)
   if path == '/meter_data' then
-    if is_frozen then return end -- Ekran dondurulduysa veriyi güncelleme
+    if is_frozen then return end
     
-    data.st = args[1]
-    data.int = args[2]
-    data.corr = args[3]
+    -- Gelen ham değerlere kalibrasyon offsetini ekliyoruz
+    data.mom = args[1] + calib_db
+    data.st = args[2] + calib_db
+    data.int = args[3] + calib_db
+    data.corr = args[4] -- Phase korelasyonu desibelden bağımsızdır, etkilenmez.
     
-    -- Spektrum verilerini çek ve Peak hesaplamasını yap
     for i = 1, 32 do
-      local val = args[3 + i]
+      local val = args[4 + i] + calib_db
       data.spec[i] = val
-      
-      -- Peak noktası yeni değerden küçükse yukarı zıpla, değilse yavaşça düş
       if val >= data.peaks[i] then
         data.peaks[i] = val
       else
@@ -67,14 +64,11 @@ osc.event = function(path, args, from)
   end
 end
 
--- DONANIM KONTROLLERİ
 function key(n, z)
   if n == 2 and z == 1 then
-    -- K2: Ekranı Dondur / Çöz
     is_frozen = not is_frozen
     _G.screen_dirty = true
   elseif n == 3 and z == 1 then
-    -- K3: Integrated LUFS'u sıfırla (Yeni parçaya geçerken)
     engine.reset_int()
     data.int = -70
     _G.screen_dirty = true
@@ -82,116 +76,113 @@ function key(n, z)
 end
 
 function enc(n, d)
-  if n == 2 then
-    -- E2: Hedef LUFS çizgisini ayarla
+  if n == 1 then
+    -- E1: Kalibrasyon Trim Değeri (+/- 24 dB arası)
+    calib_db = util.clamp(calib_db + d, -24, 24)
+    _G.screen_dirty = true
+  elseif n == 2 then
     target_lufs = util.clamp(target_lufs + d, -40, 0)
     _G.screen_dirty = true
   elseif n == 3 then
-    -- E3: Spektrum aralığını ayarla (Zayıf sinyaller için görsel gain)
     spec_max = util.clamp(spec_max + d, -60, 0)
     _G.screen_dirty = true
   end
 end
 
--- EKRAN ÇİZİM FONKSİYONU
+local function format_lufs(val)
+  if val < -65 then return "-inf" else return string.format("%.1f", val) end
+end
+
 function redraw()
   screen.clear()
-  screen.aa(1) -- Daha pürüzsüz grafikler için Anti-Aliasing açık
+  screen.aa(1)
   
-  -- Dikey Ayırıcı Çizgi (Ekranı ikiye böler: X=62)
   screen.level(2)
   screen.move(62, 0); screen.line(62, 64); screen.stroke()
 
   -- ==========================================
-  -- 1. SOL BLOK: DEV LUFS GÖSTERGELERİ (0 - 60 px)
+  -- 1. SOL BLOK: LUFS GÖSTERGELERİ (M, S, I)
   -- ==========================================
-  
-  -- ST LUFS Başlığı ve Target Değeri
   screen.font_size(8)
-  screen.level(4)
-  screen.move(0, 10); screen.text("ST LUFS")
   screen.level(2)
-  screen.move(40, 10); screen.text("T:" .. target_lufs)
+  screen.move(40, 7); screen.text("T:" .. target_lufs)
   
-  -- ST LUFS Rakamı
-  screen.font_size(16)
-  local st_color = (data.st >= target_lufs) and 15 or 8 -- Hedefi geçerse parla
-  screen.level(st_color)
-  screen.move(0, 26)
-  if data.st < -65 then screen.text("-inf") else screen.text(string.format("%.1f", data.st)) end
+  screen.level(4)
+  screen.move(0, 7); screen.text("MOM")
+  screen.font_size(14)
+  screen.level((data.mom >= target_lufs) and 15 or 8)
+  screen.move(0, 20); screen.text(format_lufs(data.mom))
   
-  -- INT LUFS Başlığı
   screen.font_size(8)
   screen.level(4)
-  screen.move(0, 42); screen.text("INT LUFS")
+  screen.move(0, 29); screen.text("SHORT")
+  screen.font_size(14)
+  screen.level((data.st >= target_lufs) and 15 or 8)
+  screen.move(0, 42); screen.text(format_lufs(data.st))
   
-  -- INT LUFS Rakamı
-  screen.font_size(16)
-  local int_color = (data.int >= target_lufs) and 15 or 8
-  screen.level(int_color)
-  screen.move(0, 58)
-  if data.int < -65 then screen.text("-inf") else screen.text(string.format("%.1f", data.int)) end
+  screen.font_size(8)
+  screen.level(4)
+  screen.move(0, 51); screen.text("INT")
+  screen.font_size(14)
+  screen.level((data.int >= target_lufs) and 15 or 10) 
+  screen.move(0, 64); screen.text(format_lufs(data.int))
 
-  -- Diğer ekran birimleri için fontu normale döndür
   screen.font_size(8)
 
   -- ==========================================
-  -- 2. SAĞ ÜST BLOK: PHASE METER (X: 64-128, Y: 0-32)
+  -- 2. SAĞ ÜST BLOK: PHASE METER & CALIB INFO
   -- ==========================================
+  -- E1 ile yapılan kalibrasyon değişikliğini sağ üstte gösterelim
+  screen.level(2)
+  if calib_db ~= 0 then
+    screen.move(65, 8); screen.text(string.format("%+ddB", calib_db))
+  end
+
   screen.level(10)
   screen.move(95, 8); screen.text_center("PHASE")
-  
   screen.level(15)
   screen.move(95, 17); screen.text_center(string.format("%.2f", data.corr))
   
-  -- Phase Metre Çizgisi
   screen.level(3)
   screen.move(70, 25); screen.line(120, 25); screen.stroke()
-  screen.move(95, 23); screen.line(95, 27); screen.stroke() -- Merkez
+  screen.move(95, 23); screen.line(95, 27); screen.stroke()
   
-  -- Phase Noktası
   local cx = util.linlin(-1.0, 1.0, 70, 120, data.corr)
   screen.level(15)
   screen.rect(cx - 1, 22, 3, 6); screen.fill()
 
-  -- Yatay Ayırıcı Çizgi (Sağ tarafı altlı üstlü böler)
   screen.level(2)
   screen.move(64, 31); screen.line(128, 31); screen.stroke()
 
   -- ==========================================
-  -- 3. SAĞ ALT BLOK: MİNİ SPEKTRUM + PEAK HOLD (X: 64-128, Y: 32-64)
+  -- 3. SAĞ ALT BLOK: SPECTRUM + PEAK HOLD
   -- ==========================================
   for i = 1, 32 do
     local db = util.clamp(data.spec[i], -70, spec_max)
     local peak_db = util.clamp(data.peaks[i], -70, spec_max)
     
-    -- Yükseklikleri 0 ile 30 px arasına map et (Alt sınır Y=64)
     local h = util.linlin(-70, spec_max, 0, 30, db)
     local ph = util.linlin(-70, spec_max, 0, 30, peak_db)
     
     local x = 64 + ((i - 1) * 2)
     
-    -- Ana Barlar (Sese göre parlaklık)
     local bright = math.floor(util.linlin(-70, spec_max, 2, 10, db))
     screen.level(bright)
     screen.move(x, 64)
     screen.line(x, 64 - h)
     screen.stroke()
     
-    -- Peak Hold Noktaları (Her barın üzerinde asılı kalan maksimum noktalar)
     screen.level(15)
     screen.move(x, 64 - ph)
     screen.line(x+1, 64 - ph)
     screen.stroke()
   end
   
-  -- Spektrum tavanı bilgisini göster (E3 ile değişir)
   if spec_max < 0 then
     screen.level(2)
     screen.move(65, 38); screen.text(spec_max .. "dB")
   end
 
-  -- Dondurulmuş (Freeze) ekran uyarısı
   if is_frozen then
     screen.level(15)
     screen.move(126, 8)
