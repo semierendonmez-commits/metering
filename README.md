@@ -25,8 +25,11 @@ the engine uses a highly optimized supercollider dsp core for the heavy lifting 
 ### controls
 
 **K2**: freeze / unfreeze screen
+
 **K3**: reset integrated LUFS
+
 **E2**: adjust target LUFS level
+
 **E3**: adjust spectrum ceiling / zoom
 
 
