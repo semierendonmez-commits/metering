@@ -21,6 +21,6 @@ the engine uses a highly optimized supercollider dsp core for the heavy lifting 
 from maiden:
 
 ```text
-;install [https://github.com/semierendonmez-commits/metering](https://github.com/semierendonmez-commits/metering)
+;install [https://github.com/semierendonmez-commits/metering]
 
 
