@@ -22,7 +22,7 @@ the engine uses a highly optimized supercollider dsp core for the heavy lifting 
 
 ---
 
-## what's new in v2.2
+## what's new in v1.1
 
 - **strict standards**: the engine now strictly follows ITU-R BS.1770-4 and EBU R128 standards. uses exact 1682Hz high-shelf and 38.1Hz high-pass biquad filters.
 - **absolute gating**: added a -70 LUFS absolute gate. if your track has a silent break, the integrated (INT) average will hold its place instead of dropping to negative infinity.
