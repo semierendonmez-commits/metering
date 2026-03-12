@@ -1,4 +1,4 @@
-# metering
+# metering v1.1
 
 an audio analyzer for [norns](https://monome.org/docs/norns/)
 
@@ -22,15 +22,22 @@ the engine uses a highly optimized supercollider dsp core for the heavy lifting 
 
 ---
 
-### controls
+## what's new in v2.2
 
-**K2**: freeze / unfreeze screen
+- **strict standards**: the engine now strictly follows ITU-R BS.1770-4 and EBU R128 standards. uses exact 1682Hz high-shelf and 38.1Hz high-pass biquad filters.
+- **absolute gating**: added a -70 LUFS absolute gate. if your track has a silent break, the integrated (INT) average will hold its place instead of dropping to negative infinity.
+- **momentary loudness (MOM)**: added a 400ms momentary window to track fast transients and micro-dynamics.
+- **hardware calibration**: added a trim offset to compensate for unbalanced (TS) cables or ADC headroom. defaults to +10 dB out of the box to seamlessly match standard daw levels, but can be fine-tuned using E1.
 
-**K3**: reset integrated LUFS
+## controls
 
-**E2**: adjust target LUFS level
-
-**E3**: adjust spectrum ceiling / zoom
+| control | function |
+|---------|----------|
+| **K2** | freeze / unfreeze display |
+| **K3** | reset integrated (INT) LUFS calculation |
+| **E1** | adjust hardware calibration trim (defaults to +10 dB) |
+| **E2** | adjust target LUFS reference line (0 to -40 dB) |
+| **E3** | adjust spectrum max dB (zoom in on quiet signals) |
 
 
 ## install
