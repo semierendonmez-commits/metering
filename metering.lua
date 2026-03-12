@@ -1,5 +1,5 @@
 -- scriptname: metering
--- v2.2.0
+-- v2.2.1
 -- description: Pro Audio Analyzer \n K2: Freeze \n K3: Reset INT \n E1: Calib Trim \n E2: Target \n E3: Spec Max
 
 engine.name = 'Metering'
@@ -8,8 +8,6 @@ local is_frozen = false
 local target_lufs = -14
 local spec_max = 0
 local peak_decay = 0.5
-
--- YENİ: Kalibrasyon Offset'i (E1 ile ayarlanır)
 local calib_db = 10 
 
 local data = {
@@ -26,15 +24,16 @@ for i=1, 32 do
   data.peaks[i] = -70
 end
 
-_G.screen_dirty = false
+-- GLOBAL YERİNE LOCAL DEĞİŞKEN (Best Practice)
+local screen_dirty = false
 
 function init()
   clock.run(function()
     while true do
       clock.sleep(1/15)
-      if _G.screen_dirty then
+      if screen_dirty then
         redraw()
-        _G.screen_dirty = false
+        screen_dirty = false
       end
     end
   end)
@@ -44,11 +43,10 @@ osc.event = function(path, args, from)
   if path == '/meter_data' then
     if is_frozen then return end
     
-    -- Gelen ham değerlere kalibrasyon offsetini ekliyoruz
     data.mom = args[1] + calib_db
     data.st = args[2] + calib_db
     data.int = args[3] + calib_db
-    data.corr = args[4] -- Phase korelasyonu desibelden bağımsızdır, etkilenmez.
+    data.corr = args[4] 
     
     for i = 1, 32 do
       local val = args[4 + i] + calib_db
@@ -60,32 +58,31 @@ osc.event = function(path, args, from)
       end
     end
     
-    _G.screen_dirty = true
+    screen_dirty = true
   end
 end
 
 function key(n, z)
   if n == 2 and z == 1 then
     is_frozen = not is_frozen
-    _G.screen_dirty = true
+    screen_dirty = true
   elseif n == 3 and z == 1 then
     engine.reset_int()
     data.int = -70
-    _G.screen_dirty = true
+    screen_dirty = true
   end
 end
 
 function enc(n, d)
   if n == 1 then
-    -- E1: Kalibrasyon Trim Değeri (+/- 24 dB arası)
     calib_db = util.clamp(calib_db + d, -24, 24)
-    _G.screen_dirty = true
+    screen_dirty = true
   elseif n == 2 then
     target_lufs = util.clamp(target_lufs + d, -40, 0)
-    _G.screen_dirty = true
+    screen_dirty = true
   elseif n == 3 then
     spec_max = util.clamp(spec_max + d, -60, 0)
-    _G.screen_dirty = true
+    screen_dirty = true
   end
 end
 
@@ -132,7 +129,6 @@ function redraw()
   -- ==========================================
   -- 2. SAĞ ÜST BLOK: PHASE METER & CALIB INFO
   -- ==========================================
-  -- E1 ile yapılan kalibrasyon değişikliğini sağ üstte gösterelim
   screen.level(2)
   if calib_db ~= 0 then
     screen.move(65, 8); screen.text(string.format("%+ddB", calib_db))
