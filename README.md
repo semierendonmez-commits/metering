@@ -55,3 +55,35 @@ from maiden:
 ;install https://github.com/semierendonmez-commits/metering
 
 
+``` 
+
+# changelog
+
+all notable changes to the `metering` script.
+
+### v1.1.1
+- **optimization**: removed global namespace pollution (`_G.screen_dirty`) in favor of local variables based on community feedback. ensures better memory management and zero chance of variable collisions with other scripts.
+- **tweak**: set the default hardware calibration trim to +10 db out of the box to better match standard audio interfaces and daw levels.
+
+### v1.1.0
+- **feature**: added hardware calibration trim (E1). compensates for unbalanced (ts) cable voltage drops (-6.02 db) and hardware a/d converter headroom. calibrate once to match your daw, trust it forever.
+
+### v1.0.0 **initial release**
+- **feature**: added momentary (MOM) lufs meter (400ms window) for tracking fast transients and micro-dynamics.
+- **engine**: rewritten dsp core to strictly follow itu-r bs.1770-4 and ebu r128 standards.
+- **engine**: implemented exact 1682hz high-shelf and 38.1hz high-pass biquad filters for accurate k-weighting.
+- **feature**: added an absolute gate at -70 lufs. silent breaks in tracks no longer drag the integrated (INT) average down to negative infinity.
+
+### v0.9.0
+- **ui**: massive visual overhaul. dedicated left half of the screen to giant, easily readable lufs values.
+- **feature**: added target lufs reference line (E2). numbers glow when the signal hits or exceeds the target.
+- **feature**: added gravity-based "peak hold" dots to the 32-band spectrum analyzer.
+- **feature**: added spectrum ceiling / zoom control (E3) to visibly monitor quiet signals.
+- **feature**: added freeze display function (K2) to catch and analyze specific audio frames.
+
+### v0.2.0.
+- **bugfix**: built a dedicated osc routing bridge (`OSCFunc`) in the supercollider engine to properly forward `/meter_data` out of scsynth and into the norns lua environment via port 10111.
+
+### v0.1.0
+- **beta release**: basic framework established with 32-band logarithmic spectrum analyzer, short-term / integrated lufs, and goniometer-style phase correlation meter.
+
