@@ -38,34 +38,6 @@ crest factor widget — shows peak minus RMS in dB. low crest = compressed, high
 
 input offset on E1 — always accessible, always visible on screen. default +10dB. no more digging through menus to calibrate.
 
-updated controls
-| control | function |
-| E1 | input offset (dB) |
-
-| E2 | target LUFS |
-
-| E3 | spectrum ceiling |
-
-| K1 | page toggle |
-
-| K2 | freeze |
-
-| K3 | reset INT LUFS + peaks |
-
----
-
-### what's new in v1.1?
-
-**1. hardware calibration trim (E1)**
-*why is my norns showing -24 when my daw shows -14?* if you use unbalanced (ts) cables or hit the hardware adc headroom, you lose exact voltage. to fix this, **E1** is now a calibration trim. the script **defaults to +10 db** ( set after my own output calibration tests) out of the box to perfectly match most standard audio interfaces and daw levels, but you can always fine-tune it to your studio by turning E1.
-
-
-**2. momentary LUFS (MOM)**
-the ui now features three LUFS values. alongside the 3-second SHORT and the overall INT, there is now a 400ms MOMENTARY meter. it dances beautifully with your kicks and transients.
-
-**3. Engine rewrite**
-the dsp engine has been rewritten to strictly follow itu-r bs.1770-4 / ebu r128 standards. it now features an absolute gate at -70 LUFS. if you stop the music or hit a silent break, the integrated (INT) average holds its place instead of dropping to negative infinity. mathematically identical to your studio plugins.
-
 
 ## controls
 
@@ -75,7 +47,7 @@ the dsp engine has been rewritten to strictly follow itu-r bs.1770-4 / ebu r128 
 | **K3** | reset integrated (INT) LUFS calculation |
 | **E1** | adjust hardware calibration trim (defaults to +10 dB) |
 | **E2** | adjust target LUFS reference line (0 to -40 dB) |
-| **E3** | adjust spectrum max dB (zoom in on quiet signals) |
+| **E3** | adjust spectrum max ceiling (zoom in on quiet signals) |
 
 
 ## install
