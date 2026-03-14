@@ -22,6 +22,38 @@ the engine uses a highly optimized supercollider dsp core for the heavy lifting 
 
 ---
 
+v2.0.0 — modular layout + goniometer
+metering v2 is here. page 1 is now fully configurable. four slots, ten widgets — build the metering layout you need.
+
+what’s new
+modular slot system — page 1 is a 2×2 grid. each slot is assigned from the params menu. choose from: ST LUFS, INT LUFS, MOM, PHASE, GONIOMETER, SPECTRUM, PEAK/RMS, BALANCE, CREST, or EMPTY. slot assignments save with presets.
+
+goniometer — proper Lissajous/M-S stereo image display with fading trail. mono signal draws a vertical line, wide stereo scatters, out-of-phase goes horizontal. essential for checking stereo compatibility.
+
+momentary — 400ms window loudness, now available as its own widget alongside short-term and integrated.
+
+ITU-R BS.1770-4 K-weighting — the engine now uses exact biquad coefficients from the standard via SOS.ar. no more approximation. at 48kHz (norns native rate) the filter matches the spec precisely.
+
+crest factor widget — shows peak minus RMS in dB. low crest = compressed, high crest = dynamic. useful for monitoring your mix dynamics in real time.
+
+input offset on E1 — always accessible, always visible on screen. default +10dB. no more digging through menus to calibrate.
+
+updated controls
+| control | function |
+| E1 | input offset (dB) |
+
+| E2 | target LUFS |
+
+| E3 | spectrum ceiling |
+
+| K1 | page toggle |
+
+| K2 | freeze |
+
+| K3 | reset INT LUFS + peaks |
+
+---
+
 ### what's new in v1.1?
 
 **1. hardware calibration trim (E1)**
@@ -60,6 +92,38 @@ from maiden:
 # changelog
 
 all notable changes to the `metering` script.
+
+v2.0.0 — modular layout + goniometer
+metering v2 is here. page 1 is now fully configurable. four slots, ten widgets — build the metering layout you need.
+
+what’s new
+modular slot system — page 1 is a 2×2 grid. each slot is assigned from the params menu. choose from: ST LUFS, INT LUFS, MOM, PHASE, GONIOMETER, SPECTRUM, PEAK/RMS, BALANCE, CREST, or EMPTY. slot assignments save with presets.
+
+goniometer — proper Lissajous/M-S stereo image display with fading trail. mono signal draws a vertical line, wide stereo scatters, out-of-phase goes horizontal. essential for checking stereo compatibility.
+
+momentary — 400ms window loudness, now available as its own widget alongside short-term and integrated.
+
+ITU-R BS.1770-4 K-weighting — the engine now uses exact biquad coefficients from the standard via SOS.ar. no more approximation. at 48kHz (norns native rate) the filter matches the spec precisely.
+
+crest factor widget — shows peak minus RMS in dB. low crest = compressed, high crest = dynamic. useful for monitoring your mix dynamics in real time.
+
+input offset on E1 — always accessible, always visible on screen. default +10dB. no more digging through menus to calibrate.
+
+updated controls
+| control | function |
+| E1 | input offset (dB) |
+
+| E2 | target LUFS |
+
+| E3 | spectrum ceiling |
+
+| K1 | page toggle |
+
+| K2 | freeze |
+
+| K3 | reset INT LUFS + peaks |
+
+
 
 ### v1.1.1
 - **optimization**: removed global namespace pollution (`_G.screen_dirty`) in favor of local variables based on community feedback. ensures better memory management and zero chance of variable collisions with other scripts.
