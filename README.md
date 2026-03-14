@@ -1,4 +1,4 @@
-# metering v1.1
+# metering v2
 
 an audio analyzer for [norns](https://monome.org/docs/norns/)
 
